@@ -194,10 +194,10 @@ async def dm_broadcast(
     Mattermost Slash Command 요청 처리 API입니다.
 
     사용 예:
-    /dm공지 등록 https://meeting.ssafy.com/hooks/...
-    /dm공지 등록확인
-    /dm공지 등록삭제
-    /dm공지 @user1 @user2 오늘 14시 회의입니다.
+    /dm 등록 https://meeting.ssafy.com/hooks/...
+    /dm 등록확인
+    /dm 등록삭제
+    /dm @user1 @user2 오늘 14시 회의입니다.
     """
 
     # SLASH_COMMAND_TOKENS가 비어 있으면 토큰 검증을 하지 않습니다.
@@ -212,7 +212,7 @@ async def dm_broadcast(
     text = text.strip()
 
     # 2. 등록 명령어 처리
-    # 예: /dm공지 등록 https://meeting.ssafy.com/hooks/xxxx
+    # 예: /dm 등록 https://meeting.ssafy.com/hooks/xxxx
     if text.startswith("등록 "):
         webhook_url = text.replace("등록 ", "", 1).strip()
 
@@ -221,7 +221,7 @@ async def dm_broadcast(
                 "response_type": "ephemeral",
                 "text": (
                     "Webhook URL 형식이 올바르지 않습니다.\n\n"
-                    "예: `/dm공지 등록 https://meeting.ssafy.com/hooks/xxxx`"
+                    "예: `/dm 등록 https://meeting.ssafy.com/hooks/xxxx`"
                 )
             })
 
@@ -231,12 +231,12 @@ async def dm_broadcast(
             "response_type": "ephemeral",
             "text": (
                 f"@{user_name}님의 Webhook URL 등록이 완료되었습니다.\n"
-                "이제 `/dm공지 @대상자 메시지` 형식으로 사용할 수 있습니다."
+                "이제 `/dm @대상자 메시지` 형식으로 사용할 수 있습니다."
             )
         })
 
     # 3. 등록 확인 명령어 처리
-    # 예: /dm공지 등록확인
+    # 예: /dm 등록확인
     if text == "등록확인":
         webhook_url = get_registered_webhook_url(user_name)
 
@@ -246,7 +246,7 @@ async def dm_broadcast(
                 "text": (
                     f"@{user_name}님의 Webhook URL이 아직 등록되어 있지 않습니다.\n\n"
                     "먼저 아래 형식으로 등록하세요.\n"
-                    "`/dm공지 등록 https://meeting.ssafy.com/hooks/xxxx`"
+                    "`/dm 등록 https://meeting.ssafy.com/hooks/xxxx`"
                 )
             })
 
@@ -259,7 +259,7 @@ async def dm_broadcast(
         })
 
     # 4. 등록 삭제 명령어 처리
-    # 예: /dm공지 등록삭제
+    # 예: /dm 등록삭제
     if text == "등록삭제":
         deleted = delete_webhook_url(user_name)
 
@@ -279,15 +279,24 @@ async def dm_broadcast(
         return JSONResponse({
             "response_type": "ephemeral",
             "text": (
-                "DM공지 사용법입니다.\n\n"
-                "1. Webhook 등록\n"
-                "`/dm공지 등록 https://meeting.ssafy.com/hooks/xxxx`\n\n"
-                "2. 등록 확인\n"
-                "`/dm공지 등록확인`\n\n"
-                "3. 등록 삭제\n"
-                "`/dm공지 등록삭제`\n\n"
-                "4. DM 발송\n"
-                "`/dm공지 @user1 @user2 오늘 14시 회의입니다.`"
+                "DM 명령어 사용법입니다.\n\n"
+                "1. Incoming Webhook 만들기\n"
+                "Mattermost 왼쪽 위 팀 이름 또는 메뉴 버튼을 누릅니다.\n"
+                "`Integrations` 또는 `통합` 메뉴로 이동합니다.\n"
+                "`Incoming Webhooks`를 선택합니다.\n"
+                "`Add Incoming Webhook` 또는 `Incoming Webhook 추가`를 누릅니다.\n"
+                "이름에는 `DM 공지 - 본인이름`처럼 알아보기 쉬운 값을 입력합니다.\n"
+                "기본 채널은 본인이 접근 가능한 채널을 선택합니다.`(1.공지사항 추천)` 실제 DM 발송 대상은 명령어의 `@username`으로 지정됩니다.\n"
+                "저장한 뒤 생성된 `https://meeting.ssafy.com/hooks/...` 주소를 복사합니다.\n"
+                "Webhook URL은 비밀번호처럼 관리하고 공개 채널이나 문서에 노출하지 마세요.\n\n"
+                "2. Webhook 등록\n"
+                "`/dm 등록 https://meeting.ssafy.com/hooks/xxxx`\n\n"
+                "3. 등록 확인\n"
+                "`/dm 등록확인`\n\n"
+                "4. 등록 삭제\n"
+                "`/dm 등록삭제`\n\n"
+                "5. DM 발송\n"
+                "`/dm @user1 @user2 오늘 14시 회의입니다.`"
             )
         })
 
@@ -300,7 +309,7 @@ async def dm_broadcast(
             "text": (
                 f"@{user_name}님의 Webhook URL이 등록되어 있지 않습니다.\n\n"
                 "먼저 본인 계정으로 Incoming Webhook을 만든 뒤 아래처럼 등록하세요.\n"
-                "`/dm공지 등록 https://meeting.ssafy.com/hooks/xxxx`"
+                "`/dm 등록 https://meeting.ssafy.com/hooks/xxxx`"
             )
         })
 
@@ -312,7 +321,7 @@ async def dm_broadcast(
             "response_type": "ephemeral",
             "text": (
                 "대상자를 찾지 못했습니다.\n"
-                "예: `/dm공지 @user1 @user2 오늘 14시 회의입니다.`"
+                "예: `/dm @user1 @user2 오늘 14시 회의입니다.`"
             )
         })
 
@@ -324,7 +333,7 @@ async def dm_broadcast(
             "response_type": "ephemeral",
             "text": (
                 "보낼 메시지가 없습니다.\n"
-                "예: `/dm공지 @user1 @user2 오늘 14시 회의입니다.`"
+                "예: `/dm @user1 @user2 오늘 14시 회의입니다.`"
             )
         })
 
